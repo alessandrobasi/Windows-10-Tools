@@ -12,6 +12,9 @@ Windows 10 ( Home | Professional | ecc.. )
 - **Scan it with your antivirus** (for securety reason)
 - Open the file *Windows 10 tool.exe*
 
+## Well know bugs
+
+- After opened the program as Amministrator alert box show up
 
 ## License
 
