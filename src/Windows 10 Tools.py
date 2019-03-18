@@ -39,7 +39,7 @@ class Program(QMainWindow):
         self.setGeometry(self.x, self.y, self.lunghezza, self.altezza)
         self.statusBar().showMessage('By alessandrobasi.it')
         
-        self.cmd = os.path.join(os.environ["systemdrive"],"\\windows","system32","cmd.exe")
+        self.cmd = os.path.join(os.environ["SYSTEMDRIVE"],"\\windows","system32","cmd.exe")
         
         ## TO startup
         self.startup()
@@ -238,11 +238,12 @@ Peso: {peso}
                     zip_ref.extractall(dir_file)
                     zip_ref.close()
                     
-                    run_exe = run_exe_temp
+                    
                     
                     self.testo.setText(self.testo.text()+"\nUnzip finito\n\n")
             
-            
+                run_exe = run_exe_temp
+                
             if not self.testo.text():
                 self.testo.setText('File già scaricato\n')
             
@@ -269,9 +270,12 @@ Tornare indietro
             apri_cartella = QPushButton("Aprire la cartella")
             apri_cartella.clicked.connect( self.open_directory(dir_file) )
             
+            #print(self.cmd,r"/k " + run_exe + r"")
+            
             esegui_programma = QPushButton("eseguire il programma")
             if file_scaricato.endswith(".cmd") or zip_run.endswith(".cmd"):
-                esegui_programma.clicked.connect( self.run_program(self.cmd,r"/k " + run_exe + r"") )
+                #esegui_programma.clicked.connect( self.run_program(self.cmd,r"/k " + run_exe + r"") )
+                esegui_programma.clicked.connect( self.run_program(run_exe) )
             else:
                 esegui_programma.clicked.connect( self.run_program(run_exe) )
             
