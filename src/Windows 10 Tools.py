@@ -526,7 +526,7 @@ def start():
     
     
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
-    
+    app.setWindowIcon(QIcon('icon.ico')) # 'icon.ico'
     
     
     ex = Program()
@@ -547,8 +547,13 @@ def is_admin():
 
 ## Start program ##
 
+myappid = 'alessandrobasiit.windows01tool.program.18'
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
 if not is_admin():
+    
     ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, executable, None, 1)
+    
 
 if is_admin():
     

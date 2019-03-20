@@ -10,7 +10,7 @@ param = Executable(
         icon="icon.ico"
         )
 
-includefiles = [r"C:\Users\aless\Desktop\python\pytoexe\windows10tool\platforms"]
+includefiles = [r"platforms",r"icon.ico"]
 
 packages = ["idna","os","ctypes","urllib.request","zipfile","ipaddress","sys","netifaces","platform","subprocess","PyQt5"]
 
