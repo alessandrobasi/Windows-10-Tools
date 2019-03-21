@@ -28,17 +28,22 @@ class Program(QMainWindow):
     def __init__(self):
         super().__init__()
         
-        
+        # Set window title
         self.setWindowTitle('Windows 10 Tool')
         
+        # Aspect of the window
         self.x = 200
         self.y = 200
         self.lunghezza = 500
         self.altezza = 250
         
+        # Set where and how big is the window
         self.setGeometry(self.x, self.y, self.lunghezza, self.altezza)
+        
+        # Set status bar text
         self.statusBar().showMessage('By alessandrobasi.it')
         
+        # Global cmd path
         self.cmd = os.path.join(os.environ["SYSTEMDRIVE"],"\\windows","system32","cmd.exe")
         
         ## TO startup
@@ -48,56 +53,66 @@ class Program(QMainWindow):
     
     
     def startup(self):
-        
+        # Global text message
         self.testo = QLabel()
+        
+        # Set text message
         self.testo.setText('''Benvenuto nel tool di Windows 10
 
 Creato da alessandrobasi.it
 Ver. 1.8
 03/03/2019\n''')
         
+        # Local button
         button_desktop = QPushButton("Ok")
-        ## TO scelta_cartella
+        
+        ## TO scelta_cartella on click event
         button_desktop.clicked.connect(self.scelta_cartella)
         
-        
-        
+        # Local layout
+        # Horizontal layout
         layout = QHBoxLayout()
         layout.addStretch(1)
         layout.addWidget(self.testo)
         layout.addStretch(1)
         
-        
+        # Horizontal layout
         layout1 = QHBoxLayout()
         layout1.addStretch(1)
         layout1.addWidget(button_desktop)
         layout1.addStretch(1)
         
-        
+        # Vertical layout
         vlayout = QVBoxLayout()
         vlayout.addLayout(layout)
         vlayout.addStretch(1)
         vlayout.addLayout(layout1)
         vlayout.addStretch(1)
         
-        
+        # Layout master
         wid = QWidget(self)
         self.setCentralWidget(wid)
         wid.setLayout(vlayout)
         
-        
+        ## START GUI
         self.show()
         
         pass
     
     
     def open_directory(self,cartella):
+        # Global open directory
+        
         def call():
             Popen(fr'explorer /separate, {cartella}')
+        
+        
         return call
     
     
     def run_program(self,programma,parm=None):
+        # Global run program
+        
         def call():
             
             if parm != None:
@@ -110,17 +125,19 @@ Ver. 1.8
     ## Install dir ##
     
     def scelta_cartella(self):
+        # Location dir
         
         desktop  = os.path.join(os.environ["systemdrive"], os.environ["HOMEPATH"], "Desktop", "Windows 10 tool")   ## <K>:\Users\<user>\Desktop
         temp_dir = os.path.join(os.environ["systemdrive"], os.environ["temp"], "Windows 10 tool")                  ## <K>:\Users\<user>\AppData\Local\Temp
         
-        
+        # Local button
         button_desktop = QPushButton("Desktop")
-        ## TO main
+        ## TO main on click event
         button_desktop.clicked.connect( self.set_install_dir(desktop) )
         
+        # Local button
         button_temp = QPushButton("Temp")
-        ## TO main
+        ## TO main on click event
         button_temp.clicked.connect(self.set_install_dir(temp_dir))
         
         
@@ -129,6 +146,10 @@ Ver. 1.8
 Desktop\t\t( {desktop} )
 Temp\t\t( {temp_dir} )
 ''')
+        
+        # 
+        # Same layout property
+        # 
         
         layout = QHBoxLayout()
         layout.addStretch(1)
@@ -159,9 +180,14 @@ Temp\t\t( {temp_dir} )
     ## Intall dir ##
     
     def set_install_dir(self,nome_dir):
+        
+        # Set download dir
+        
         def call():
-            
+            # Global install dir
             self.install_dir = nome_dir
+            
+            # TO main window
             self.main()
         
         return call
@@ -171,7 +197,9 @@ Temp\t\t( {temp_dir} )
     ## Download manager ##
     
     def download(self, tipo, downloadurl, file_scaricato, peso, zip_uncompress='', zip_run=''):
-    
+        
+        # Global download window
+        
         def call():
             
             dir_file = self.install_dir+"\\"+tipo
@@ -300,6 +328,7 @@ Tornare indietro
     
     def main(self):
         
+        # Get network info from library (netiface)
         for nic in gateways()['default'].values():
             if ip_address(nic[0]).version == 4:
                 gateway = nic[0]
@@ -308,6 +337,7 @@ Tornare indietro
         mac = ifaddresses(interface)[AF_LINK][0]['addr']
         ip, subnet, broadcast = ifaddresses(interface)[AF_INET][0].values()
         
+        # Get system info form library (platform)
         sistema,nome,_,versione,_,processore = list(uname())
         
         self.testo.setText(f'''###### Info ######
@@ -517,50 +547,62 @@ Kaspersky Free (install)
 
 
 
-
+## Start GUI
 def start():
     
+    # QT auto pixel scale
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
     
+    # Create instance of GUI
     app = QApplication([])
     
-    
+    # QT auto pixel scale
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
-    app.setWindowIcon(QIcon('icon.ico')) # 'icon.ico'
     
+    # QT GUI icon  -  USELESS
+    app.setWindowIcon(QIcon('icon.ico'))
     
+    ## RUN
     ex = Program()
     app.exec_()
 
 
 
-
+# Function for checking privileges
 def is_admin():
     
     try:
         is_admin = os.getuid() == 0
     except AttributeError:
         is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-
+    
+    # Return True if is in privilege mode
+    # Return False if isn't in privilege mode
     return is_admin
 
 
 ## Start program ##
 
+# APP ID  -  useless?
 myappid = 'alessandrobasiit.windows01tool.program.18'
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
+# Check if the program is in privilege mode, if is not
 if not is_admin():
     
+    # Call privileges
     ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, executable, None, 1)
     
-
+# If the program has privilage
 if is_admin():
     
     
     ## Start GUI
     start()
-    
+
+## If not error message
 else:
     ctypes.windll.user32.MessageBoxW(0, "Avvia il programma come amministratore", "Errore", 0)
 
+
+## END
