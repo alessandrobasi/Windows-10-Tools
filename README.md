@@ -1,4 +1,4 @@
-# Windows-10-Tools
+# Windows 10 Tools
 Various tools for windows 10 for now is only in italian
 
 ## Requisites
@@ -9,7 +9,7 @@ Windows 10 ( Home | Professional | ecc.. )
 
 - Download the [zip file](compiled)
 - Extract in a directory
-- **Scan it with your antivirus** (for securety reason)
+- **Scan it with your antivirus** (for securety reasons)
 - Open the file *Windows 10 tool.exe*
 
 ## Well know bugs
