@@ -208,7 +208,9 @@ Temp\t\t( {temp_dir} )
             
             self.testo.clear()
             
-            
+            # 
+            # Same layout property
+            # 
             
             layout = QHBoxLayout()
             layout.addStretch(1)
@@ -359,15 +361,24 @@ System info:
 Cosa devo fare?
 ''')
     
-        
+        # Local button 
         win_update = QPushButton("Tool Windows Update")
+        # TO windows_update window on click event
         win_update.clicked.connect( self.windows_update )
         
+        # Local button
         download_antivirus = QPushButton("Scaricare Antivirus")
+        # TO download_antivirus on click event
         download_antivirus.clicked.connect( self.download_antivirus )
         
+        # Local button
         cmd_commandi = QPushButton("Comandi CMD")
+        # TO cmd_comandi on click event
         cmd_commandi.clicked.connect( self.cmd_command )
+        
+        # 
+        # Same layout property
+        # 
         
         layout = QHBoxLayout()
         layout.addStretch(1)
@@ -420,11 +431,14 @@ Cosa devo fare?
         back = QPushButton("<-- Tornare indietro")
         back.clicked.connect( self.main )
         
+        # 
+        # Same layout property
+        # 
+        
         layout = QHBoxLayout()
         layout.addStretch(1)
         layout.addWidget(self.testo)
         layout.addStretch(1)
-        
         
         layout1 = QHBoxLayout()
         layout1.addStretch(1)
@@ -465,15 +479,24 @@ Kaspersky (no-install)
 Kaspersky Free (install)
 ''')
         
+        # Local button
         download_kaspersky_no_install = QPushButton("Kaspersky (no-install)")
+        # TO download on click event
         download_kaspersky_no_install.clicked.connect( self.download('Kaspersky_no_install','http://devbuilds.kaspersky-labs.com/devbuilds/KVRT/latest/full/KVRT.exe','KVRT.exe','150 MB'))
         
+        # Local button
         download_kaspersky_install = QPushButton("Kaspersky Free (install)")
+        # TO download on click event
         download_kaspersky_install.clicked.connect( self.download('Kaspersky_install','https://products.s.kaspersky-labs.com/homeuser/kfa2019/19.0.0.1088ab/italian-0.3880.0/5c42f68b/startup_15002.exe','startup_15002.exe','2.45 MB\n(Il file effettua download aggiuntivi)') )
         
+        # Local button
         back = QPushButton("<-- Tornare indietro")
+        # TO main on click event
         back.clicked.connect( self.main )
         
+        # 
+        # Same layout property
+        # 
         
         layout = QHBoxLayout()
         layout.addStretch(1)
@@ -507,15 +530,24 @@ Kaspersky Free (install)
         self.testo.setText('''Scegliere quale comando eseguire
 ''')
         
+        # Local button
         cmd_dism = QPushButton("Integrità Windows DISM")
+        # TO run_program on click event
         cmd_dism.clicked.connect( self.run_program(self.cmd,r"/k DISM.exe /Online /Cleanup-image /Restorehealth") )
         
+        # Local button
         cmd_sfc = QPushButton("File check SFC")
+        # TO run_program on click event
         cmd_sfc.clicked.connect( self.run_program(self.cmd,r"/k sfc /scannow") )
         
+        # Local button
         back = QPushButton("<-- Tornare indietro")
+        # TO main on click event
         back.clicked.connect( self.main )
         
+        # 
+        # Same layout property
+        # 
         
         layout = QHBoxLayout()
         layout.addStretch(1)
