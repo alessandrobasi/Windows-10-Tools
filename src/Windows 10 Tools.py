@@ -104,8 +104,13 @@ Ver. 1.8
         # Global open directory
         
         def call():
-            Popen(fr'explorer /separate, {cartella}')
-        
+            
+            try:
+                Popen(fr'explorer /separate, {cartella}')
+            except:
+                Popen(fr'explorer')
+            
+            pass
         
         return call
     
@@ -114,11 +119,13 @@ Ver. 1.8
         # Global run program
         
         def call():
-            
-            if parm != None:
-                Popen(r'Powershell -Command "& { Start-Process \"' + programma + r' \" \"' + parm + r'\" -Verb RunAs } " ')
-            else:
-                Popen(r'Powershell -Command "& { Start-Process \"' + programma + r' \" -Verb RunAs } " ')
+            try:
+                if parm != None:
+                    Popen(r'Powershell -Command "& { Start-Process \"' + programma + r' \" \"' + parm + r'\" -Verb RunAs } " ')
+                else:
+                    Popen(r'Powershell -Command "& { Start-Process \"' + programma + r' \" -Verb RunAs } " ')
+            except:
+                pass
             
         return call
     
@@ -127,9 +134,9 @@ Ver. 1.8
     def scelta_cartella(self):
         # Location dir
         
-        desktop  = os.path.join(os.environ["systemdrive"], os.environ["HOMEPATH"], "Desktop", "Windows 10 tool")   ## <K>:\Users\<user>\Desktop
-        temp_dir = os.path.join(os.environ["systemdrive"], os.environ["temp"], "Windows 10 tool")                  ## <K>:\Users\<user>\AppData\Local\Temp
-        
+        desktop  = os.path.join(os.environ["systemdrive"], os.environ["HOMEPATH"], "Desktop", "Windows 10 tool")    ## <K>:\Users\<user>\Desktop
+        temp_dir = os.path.join(os.environ["systemdrive"], os.environ["temp"], "Windows 10 tool")                   ## <K>:\Users\<user>\AppData\Local\Temp
+        download_dir = os.path.join(os.environ["systemdrive"], os.environ["HOMEPATH"],"Download","Windows 10 tool") ## <K>:\Users\<user>\Download
         # Local button
         button_desktop = QPushButton("Desktop")
         ## TO main on click event
@@ -140,11 +147,17 @@ Ver. 1.8
         ## TO main on click event
         button_temp.clicked.connect(self.set_install_dir(temp_dir))
         
+        # Local button
+        button_download = QPushButton("Download")
+        ## TO main on click event
+        button_download.clicked.connect(self.set_install_dir(download_dir))
+        
         
         self.testo.setText(f'''Scegliere dove salvare eventuali file scaricati
 
 Desktop\t\t( {desktop} )
 Temp\t\t( {temp_dir} )
+Download\t\t ( {download_dir} )
 ''')
         
         # 
@@ -163,11 +176,17 @@ Temp\t\t( {temp_dir} )
         layout1.addWidget(button_temp)
         layout1.addStretch(1)
         
+        layout2 = QHBoxLayout()
+        layout2.addStretch(1)
+        layout2.addWidget(button_download)
+        layout2.addStretch(1)
+        
         
         vlayout = QVBoxLayout()
         vlayout.addLayout(layout)
         vlayout.addStretch(1)
         vlayout.addLayout(layout1)
+        vlayout.addLayout(layout2)
         vlayout.addStretch(1)
         
         
