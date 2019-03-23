@@ -342,8 +342,12 @@ Tornare indietro
         # Get system info form library (platform)
         sistema,nome,_,versione,_,processore = list(uname())
         
-        self.testo.setText(f'''###### Info ######
-Network info:
+        self.testo.setText(f'''###### Info ######\n''')
+        
+        if urllib.request.getproxies():
+            self.testo.setText(self.testo.text() + f"\n⚠️ Sono impostati dei proxy su Windows\n\n")
+        
+        self.testo.setText(self.testo.text() + f'''Network info:
     GUID interfaccia:\t\t{interface}
     MAC interface:\t\t{mac}
     Gateway:\t\t{gateway} 
