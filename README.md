@@ -10,7 +10,7 @@ Windows 10 ( Home | Professional | ecc.. )
 - Download the [zip file](compiled)
 - Extract in a directory
 - **Scan it with your antivirus** (for securety reasons)
-- Open *Windows 10 tool.exe* as **Amministrator**
+- Open *"Windows 10 tool.exe"* as **Amministrator**
 
 ## Tools
 
