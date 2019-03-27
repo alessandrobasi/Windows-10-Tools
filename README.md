@@ -15,11 +15,11 @@ Windows 10 ( Home | Professional | ecc.. )
 ## Tools
 
 - \*Network and System information
--  Shortcut for Windows Update Settings (ms-settings:windowsupdate-options)
--  Download Reset Windows Update Agent (gallery.technet.microsoft.com/scriptcenter/Reset-Windows-Update-Agent-d824badc/)
--  Download Windows Update Assistant (www.microsoft.com/it-it/software-download/windows10)
--  Download Kaspersky Virus Removal Tool (www.kaspersky.it/downloads/thank-you/free-virus-removal-tool)
--  Download Kasperksy Free Antivirus (https://www.kaspersky.it/free-antivirus)
+-  Shortcut for Windows Update Settings (`ms-settings:windowsupdate-options`)
+-  Download Reset Windows Update Agent (`gallery.technet.microsoft.com/scriptcenter/Reset-Windows-Update-Agent-d824badc/`)
+-  Download Windows Update Assistant (`www.microsoft.com/it-it/software-download/windows10`)
+-  Download Kaspersky Virus Removal Tool (`www.kaspersky.it/downloads/thank-you/free-virus-removal-tool`)
+-  Download Kasperksy Free Antivirus (`https://www.kaspersky.it/free-antivirus`)
 - \*Shortcut for DISM.exe CMD Command (cmd.exe /k DISM.exe /Online /Cleanup-image /Restorehealth)
 - \*Shortcut for SFC CMD Command (cmd.exe /k sfc /scannow)
 
