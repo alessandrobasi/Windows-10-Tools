@@ -564,6 +564,16 @@ Kaspersky Free (install)
         cmd_sfc.clicked.connect( self.run_program(self.cmd,r"/k sfc /scannow") )
         
         # Local button
+        cmd_purge_dns = QPushButton("Svuota cache DNS")
+        # TO run_program on click event
+        cmd_purge_dns.clicked.connect( self.run_program(self.cmd,r"/k ipconfig /flushdns") )
+        
+        # Local button
+        cmd_purge_arp = QPushButton("Svuota tabella ARP")
+        # TO run_program on click event
+        cmd_purge_arp.clicked.connect( self.run_program(self.cmd,r"/k arp -d && echo Done") )
+        
+        # Local button
         back = QPushButton("<-- Tornare indietro")
         # TO main on click event
         back.clicked.connect( self.main )
@@ -584,11 +594,17 @@ Kaspersky Free (install)
         layout1.addWidget(cmd_sfc)
         layout1.addStretch(1)
         
+        layout2 = QHBoxLayout()
+        layout2.addStretch(1)
+        layout2.addWidget(cmd_purge_dns)
+        layout2.addWidget(cmd_purge_arp)
+        layout2.addStretch(1)
         
         vlayout = QVBoxLayout()
         vlayout.addLayout(layout)
         vlayout.addStretch(1)
         vlayout.addLayout(layout1)
+        vlayout.addLayout(layout2)
         vlayout.addStretch(1)
         vlayout.addWidget(back)
         
