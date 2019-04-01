@@ -24,6 +24,7 @@ Windows 10 ( Home | Professional | ecc.. )
 - \*Shortcut for SFC CMD Command (cmd.exe /k sfc /scannow)
 - \*Shortcut for Clear DNS cache (cmd.exe /k ipconfig /flushdns)
 - \*Shortcut for Clear ARP table plus feedback text (cmd.exe /k arp -d && echo Done)
+- Shortcut for file hosts dir's
 
 \* Privilege needed
 
