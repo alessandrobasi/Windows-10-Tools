@@ -137,6 +137,7 @@ Ver. 1.8
         desktop  = os.path.join(os.environ["systemdrive"], os.environ["HOMEPATH"], "Desktop", "Windows 10 tool")    ## <K>:\Users\<user>\Desktop
         temp_dir = os.path.join(os.environ["systemdrive"], os.environ["temp"], "Windows 10 tool")                   ## <K>:\Users\<user>\AppData\Local\Temp
         download_dir = os.path.join(os.environ["systemdrive"], os.environ["HOMEPATH"],"Download","Windows 10 tool") ## <K>:\Users\<user>\Download
+        
         # Local button
         button_desktop = QPushButton("Desktop")
         ## TO main on click event
@@ -399,6 +400,11 @@ Cosa devo fare?
         # TO cmd_comandi on click event
         cmd_commandi.clicked.connect( self.cmd_command )
         
+        # Local button
+        vari_tool = QPushButton("Tool vari")
+        # TO cmd_comandi on click event
+        vari_tool.clicked.connect( self.vari_tool )
+        
         # 
         # Same layout property
         # 
@@ -418,6 +424,7 @@ Cosa devo fare?
         layout2 = QHBoxLayout()
         layout2.addStretch(1)
         layout2.addWidget(cmd_commandi)
+        layout2.addWidget(vari_tool)
         layout2.addStretch(1)
         
         vlayout = QVBoxLayout()
@@ -616,6 +623,55 @@ Kaspersky Free (install)
         
         pass
 
+    def vari_tool(self):
+        self.testo.setText('''Scegliere quale comando eseguire
+''')
+        
+        # Local button
+        host_dir = QPushButton("Cartella file hosts")
+        # TO run_program on click event
+        host = os.path.join(os.environ["systemdrive"], "\\Windows", "System32", "drivers", "etc")
+        
+        print(host)
+        
+        host_dir.clicked.connect( self.open_directory(host) )
+        
+        
+        # Local button
+        back = QPushButton("<-- Tornare indietro")
+        # TO main on click event
+        back.clicked.connect( self.main )
+        
+        # 
+        # Same layout property
+        # 
+        
+        layout = QHBoxLayout()
+        layout.addStretch(1)
+        layout.addWidget(self.testo)
+        layout.addStretch(1)
+        
+        
+        layout1 = QHBoxLayout()
+        layout1.addStretch(1)
+        layout1.addWidget(host_dir)
+        layout1.addStretch(1)
+        
+        
+        vlayout = QVBoxLayout()
+        vlayout.addLayout(layout)
+        vlayout.addStretch(1)
+        vlayout.addLayout(layout1)
+        vlayout.addStretch(1)
+        vlayout.addWidget(back)
+        
+        
+        wid = QWidget(self)
+        self.setCentralWidget(wid)
+        wid.setLayout(vlayout)
+        
+        
+        pass
 
 
 ## Start GUI
