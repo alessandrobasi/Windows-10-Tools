@@ -22,6 +22,8 @@ Windows 10 ( Home | Professional | ecc.. )
 -  Download Kasperksy Free Antivirus (`https://www.kaspersky.it/free-antivirus`)
 - \*Shortcut for DISM.exe CMD Command (cmd.exe /k DISM.exe /Online /Cleanup-image /Restorehealth)
 - \*Shortcut for SFC CMD Command (cmd.exe /k sfc /scannow)
+- \*Shortcut for Clear DNS cache (cmd.exe /k ipconfig /flushdns)
+- \*Shortcut for Clear ARP table plus feedback text (cmd.exe /k arp -d && echo Done)
 
 \* Privilege needed
 
