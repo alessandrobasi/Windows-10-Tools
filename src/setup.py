@@ -1,6 +1,4 @@
 from cx_Freeze import setup, Executable
-#import PyQt5
-
 
 OSv = "Win32GUI"    
 
@@ -10,9 +8,9 @@ param = Executable(
         icon="icon.ico"
         )
 
-includefiles = [r"platforms",r"icon.ico"]
+includefiles = [r"platforms",r"icon.ico",r"styles"]
 
-packages = ["idna","os","ctypes","urllib.request","zipfile","ipaddress","sys","netifaces","platform","subprocess","PyQt5"]
+packages = ["sys","urllib","multiprocessing","idna.idnadata","requests","shutil","os","netifaces","platform","hashlib","subprocess","PyQt5"]
 
 options = {
     'build_exe': {    
@@ -24,8 +22,8 @@ options = {
 
 setup(
       name = 'Windows 10 Tools',
-      version = '1.8',
-      description = 'Creato da alessandrobasi.it',
+      version = '2.0',
+      description = 'Created by alessandrobasi.it',
       author = 'alessandrobasi.it',
       options = options,
       executables = [param]

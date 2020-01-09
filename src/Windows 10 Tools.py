@@ -1,735 +1,265 @@
-import os
-import ctypes
-#import socket
-#import win32gui
-#import pywinauto
+import sys
 import urllib.request
-import zipfile
-#import threading 
-
-#from requests import get  # to make GET request
-from ipaddress import ip_address
-from sys import executable
+from requests import get
+from multiprocessing import Queue
+from shutil import copyfileobj
+from os import environ, path, cpu_count, makedirs
 from netifaces import gateways, ifaddresses, AF_LINK, AF_INET
 from platform import uname
+from hashlib import sha256
 from subprocess import Popen
 
+#Qt5
+from PyQt5 import uic
+from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QLineEdit, QLabel
+from PyQt5.QtCore import QThread, Qt
+from PyQt5.Qt import QCoreApplication
 
-##  QT5
+class downloadFile(QThread):
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+    def __init__(self, url, nomeFile, parent=None):
+        super().__init__(parent)
+        self.url = url
+        self.nomefile = nomeFile
+        self.finished.connect(window.unlockScreen)
 
-##
+    def run(self):
+        local_filename = self.nomefile
+        print("downloading")
+        with get(self.url, stream=True) as r:
+            with open(local_filename, 'wb') as f:
+                copyfileobj(r.raw, f)
+        print("finito")
 
-class Program(QMainWindow):
-    
+class MainWindow(QMainWindow):
+    # INIT
     def __init__(self):
-        super().__init__()
-        
-        # Set window title
-        self.setWindowTitle('Windows 10 Tool')
-        
-        # Aspect of the window
-        self.x = 200
-        self.y = 200
-        self.lunghezza = 500
-        self.altezza = 250
-        
-        # Set where and how big is the window
-        self.setGeometry(self.x, self.y, self.lunghezza, self.altezza)
-        
-        # Set status bar text
-        self.statusBar().showMessage('By alessandrobasi.it')
-        
-        # Global cmd path
-        self.cmd = os.path.join(os.environ["SYSTEMDRIVE"],"\\windows","system32","cmd.exe")
-        
-        ## TO startup
-        self.startup()
-        
-        pass
-    
-    
-    def startup(self):
-        # Global text message
-        self.testo = QLabel()
-        
-        # Set text message
-        self.testo.setText('''Benvenuto nel tool di Windows 10
+        super(MainWindow, self).__init__()
+        self.setAttribute(Qt.WA_DeleteOnClose)
 
-Creato da alessandrobasi.it
-Ver. 1.8
-03/03/2019\n''')
+        # Config
+        self.statUp_password = 0
+        self.show_proxy_allert = 0
+        self.install_dir = ""
+        self.cmd = path.join(environ["SYSTEMDRIVE"],"\\windows","system32","cmd.exe")
         
-        # Local button
-        button_desktop = QPushButton("Ok")
-        
-        ## TO scelta_cartella on click event
-        button_desktop.clicked.connect(self.scelta_cartella)
-        
-        # Local layout
-        # Horizontal layout
-        layout = QHBoxLayout()
-        layout.addStretch(1)
-        layout.addWidget(self.testo)
-        layout.addStretch(1)
-        
-        # Horizontal layout
-        layout1 = QHBoxLayout()
-        layout1.addStretch(1)
-        layout1.addWidget(button_desktop)
-        layout1.addStretch(1)
-        
-        # Vertical layout
-        vlayout = QVBoxLayout()
-        vlayout.addLayout(layout)
-        vlayout.addStretch(1)
-        vlayout.addLayout(layout1)
-        vlayout.addStretch(1)
-        
-        # Layout master
-        wid = QWidget(self)
-        self.setCentralWidget(wid)
-        wid.setLayout(vlayout)
-        
-        ## START GUI
+        self.startUp()
+    
+    # Util funct
+    def changeScreen(self, fileUi, nextFunct=""):
+        self.__nextFunct = nextFunct
+        uic.loadUi(fileUi, self)
+        if self.__nextFunct != "":
+            self.__nextFunct()
         self.show()
-        
-        pass
-    
-    
-    def open_directory(self,cartella):
-        # Global open directory
-        
-        def call():
-            
-            try:
-                Popen(fr'explorer /separate, {cartella}')
-            except:
-                Popen(fr'explorer')
-            
-            pass
-        
-        return call
-    
-    
-    def run_program(self,programma,parm=None):
-        # Global run program
-        
-        def call():
-            try:
-                if parm != None:
-                    Popen(r'Powershell -Command "& { Start-Process \"' + programma + r' \" \"' + parm + r'\" -Verb RunAs } " ')
-                else:
-                    Popen(r'Powershell -Command "& { Start-Process \"' + programma + r' \" -Verb RunAs } " ')
-            except:
-                pass
-            
-        return call
-    
-    ## Install dir ##
-    
-    def scelta_cartella(self):
-        # Location dir
-        
-        desktop  = os.path.join(os.environ["systemdrive"], os.environ["HOMEPATH"], "Desktop", "Windows 10 tool")    ## <K>:\Users\<user>\Desktop
-        temp_dir = os.path.join(os.environ["systemdrive"], os.environ["temp"], "Windows 10 tool")                   ## <K>:\Users\<user>\AppData\Local\Temp
-        download_dir = os.path.join(os.environ["systemdrive"], os.environ["HOMEPATH"],"Download","Windows 10 tool") ## <K>:\Users\<user>\Download
-        
-        # Local button
-        button_desktop = QPushButton("Desktop")
-        ## TO main on click event
-        button_desktop.clicked.connect( self.set_install_dir(desktop) )
-        
-        # Local button
-        button_temp = QPushButton("Temp")
-        ## TO main on click event
-        button_temp.clicked.connect(self.set_install_dir(temp_dir))
-        
-        # Local button
-        button_download = QPushButton("Download")
-        ## TO main on click event
-        button_download.clicked.connect(self.set_install_dir(download_dir))
-        
-        
-        self.testo.setText(f'''Scegliere dove salvare eventuali file scaricati
 
-Desktop\t\t( {desktop} )
-Temp\t\t( {temp_dir} )
-Download\t\t ( {download_dir} )
-''')
-        
-        # 
-        # Same layout property
-        # 
-        
-        layout = QHBoxLayout()
-        layout.addStretch(1)
-        layout.addWidget(self.testo)
-        layout.addStretch(1)
-        
-        
-        layout1 = QHBoxLayout()
-        layout1.addStretch(1)
-        layout1.addWidget(button_desktop)
-        layout1.addWidget(button_temp)
-        layout1.addStretch(1)
-        
-        layout2 = QHBoxLayout()
-        layout2.addStretch(1)
-        layout2.addWidget(button_download)
-        layout2.addStretch(1)
-        
-        
-        vlayout = QVBoxLayout()
-        vlayout.addLayout(layout)
-        vlayout.addStretch(1)
-        vlayout.addLayout(layout1)
-        vlayout.addLayout(layout2)
-        vlayout.addStretch(1)
-        
-        
-        wid = QWidget(self)
-        self.setCentralWidget(wid)
-        wid.setLayout(vlayout)
-        
-        pass
-    
-    ## Intall dir ##
-    
-    def set_install_dir(self,nome_dir):
-        
+    def passwordScreen(self):
+        passkey = "93e289bfc27ef917a03509c590e408f1a7ce5510143cb9a31012e975a724c736"
+        hs = sha256(self.password.text().encode('utf-8')).hexdigest()
+        if passkey == hs:
+            self.changeScreen("styles/pickDir.ui", self.pickDir) # load ui
+            #statUi() #run ui
+
+    def setInstallDir(self,nome_dir):
         # Set download dir
         
-        def call():
-            # Global install dir
-            self.install_dir = nome_dir
-            
-            # TO main window
-            self.main()
+        # Global install dir
+        self.install_dir = nome_dir
         
-        return call
-    
-    ## End Install dir ##
-    
-    ## Download manager ##
-    
-    def download(self, tipo, downloadurl, file_scaricato, peso, zip_uncompress='', zip_run=''):
+
+        ## Verifica cartella
+        if not path.exists(self.install_dir):
+            ## Crea cartella
+            makedirs(self.install_dir)
         
-        # Global download window
+        ## Verifica file
+        """
+        if not os.path.exists(dir_file+"\\"+file_scaricato):
+            self.testo.setText(fr'''Downloading...\nDa: {url}\nPeso: {peso}''')
+            QApplication.processEvents()
+            ## Download file
+            urllib.request.urlretrieve(url, dir_file+"\\"+file_scaricato)
         
-        def call():
+            self.testo.setText(self.testo.text()+"\nDownload finito\n")
+        
+        if file_scaricato.endswith("zip"):
             
-            dir_file = self.install_dir+"\\"+tipo
-            run_exe = dir_file+"\\"+file_scaricato
+            run_exe_temp = dir_file + '\\' + zip_uncompress + '\\' + zip_run
             
+            if not os.path.exists(run_exe_temp):
             
-            self.testo.clear()
-            
-            # 
-            # Same layout property
-            # 
-            
-            layout = QHBoxLayout()
-            layout.addStretch(1)
-            layout.addWidget(self.testo)
-            layout.addStretch(1)
-            
-            
-            layout1 = QHBoxLayout()
-            
-            
-            
-            vlayout = QVBoxLayout()
-            vlayout.addLayout(layout)
-            vlayout.addStretch(1)
-            
-            
-            
-            wid = QWidget(self)
-            self.setCentralWidget(wid)
-            wid.setLayout(vlayout)
-            
-            
-            
-            ## Sorgente file
-            url = downloadurl 
-            
-            
-            ## Verifica cartella
-            if not os.path.exists(dir_file):
-                ## Crea cartella
-                os.makedirs(dir_file)
-            
-            ## Verifica file
-            if not os.path.exists(dir_file+"\\"+file_scaricato):
-                self.testo.setText(fr'''Downloading...
-Da: {url}
-Peso: {peso}
-''')
-                QApplication.processEvents()
-                ## Download file
-                urllib.request.urlretrieve(url, dir_file+"\\"+file_scaricato)
-            
-                self.testo.setText(self.testo.text()+"\nDownload finito\n")
-            
-            if file_scaricato.endswith("zip"):
+                self.testo.setText(self.testo.text()+"\nUnzipping...")
                 
-                run_exe_temp = dir_file + '\\' + zip_uncompress + '\\' + zip_run
+                ## Unzip
+                zip_ref = zipfile.ZipFile(run_exe, 'r')
+                zip_ref.extractall(dir_file)
+                zip_ref.close()
                 
-                if not os.path.exists(run_exe_temp):
                 
-                    self.testo.setText(self.testo.text()+"\nUnzipping...")
-                    
-                    ## Unzip
-                    zip_ref = zipfile.ZipFile(run_exe, 'r')
-                    zip_ref.extractall(dir_file)
-                    zip_ref.close()
-                    
-                    
-                    
-                    self.testo.setText(self.testo.text()+"\nUnzip finito\n\n")
-            
-                run_exe = run_exe_temp
                 
-            if not self.testo.text():
-                self.testo.setText('File già scaricato\n')
+                self.testo.setText(self.testo.text()+"\nUnzip finito\n\n")
+        
+            run_exe = run_exe_temp
             
-            self.testo.setText(self.testo.text()+r'''Cosa vuoi fare?
-    
-Aprire la cartella
-Eseguire il programma
-Tornare indietro
-''')
-            
-            
-            
-#            t1 = threading.Thread(target=thread_download )
-#            
-#            t2 = threading.Thread(target=gui)
-#            
-#            t1.start()
-#            t2.start()
-#            
-#            t1.join()
-#            t2.join()
-            
-            
-            apri_cartella = QPushButton("Aprire la cartella")
-            apri_cartella.clicked.connect( self.open_directory(dir_file) )
-            
-            #print(self.cmd,r"/k " + run_exe + r"")
-            
-            esegui_programma = QPushButton("eseguire il programma")
-            if file_scaricato.endswith(".cmd") or zip_run.endswith(".cmd"):
-                #esegui_programma.clicked.connect( self.run_program(self.cmd,r"/k " + run_exe + r"") )
-                esegui_programma.clicked.connect( self.run_program(run_exe) )
+        if not self.testo.text():
+            self.testo.setText('File già scaricato\n')
+        
+        self.testo.setText(self.testo.text()+r'''Cosa vuoi fare?\nAprire la cartella\nEseguire il programma\nTornare indietro''')
+        """
+
+        # TO main window
+        self.changeScreen("styles/mainWin.ui", self.mainWin)
+
+    def openDir(self, cartella):
+        
+        try:
+            Popen(fr'explorer /separate, {cartella}')
+        except:
+            Popen(fr'explorer')
+
+    def runProgram(self,program,parm=None):
+        # Global run program
+        try:
+            if parm != None:
+                Popen(r'Powershell -Command "& { Start-Process \"' + program + r' \" \"' + parm + r'\" -Verb RunAs } " ')
             else:
-                esegui_programma.clicked.connect( self.run_program(run_exe) )
+                Popen(r'Powershell -Command "& { Start-Process \"' + program + r' \" -Verb RunAs } " ')
+        except:
+            pass
+
+    def lockScreen(self):
+        butt = self.findChild(QPushButton, 'back')
+        butt.setEnabled(False)
+
+    def unlockScreen(self):
+        butt = self.findChild(QPushButton, 'back')
+        butt.setEnabled(True)
+
+    def download(self, thread, fileUi, nextFunct=""):
+        self.lockScreen()
+        thread.start()
+        #self.changeScreen(fileUi, nextFunct)
+
+
+    # Screens
+    def startUp(self):
+        if self.statUp_password:
+            statUi = self.changeScreen("styles/password.ui") # load ui
+            #statUi() #run ui
+        else:
+            statUi = self.changeScreen("styles/statUp.ui") # load ui
+            #statUi() #run ui
+
+        button = self.findChild(QPushButton, 'conferma') # Find the button
+
+        if self.statUp_password:
+            self.password = self.findChild(QLineEdit, 'password')
+            button.clicked.connect(lambda: self.passwordScreen() ) # Remember to pass the definition/method, not the return value!
+        else:
+            button.clicked.connect(lambda: self.changeScreen("styles/pickDir.ui", self.pickDir) )
+
+    def pickDir(self):
+
+        desktop  = path.join(environ["systemdrive"], environ["HOMEPATH"], "Desktop", "Windows 10 tool")    ## <K>:\Users\<user>\Desktop
+        temp = path.join(environ["systemdrive"], environ["temp"], "Windows 10 tool")                   ## <K>:\Users\<user>\AppData\Local\Temp
+        download_dir = path.join(environ["systemdrive"], environ["HOMEPATH"],"Downloads","Windows 10 tool") ## <K>:\Users\<user>\Download
+
+        test_cartelle = self.findChild(QLabel, "cartelle")
+        test_cartelle.setText(f'''Desktop\t\t( {desktop} )\nTemp\t\t( {temp} )\nDownload\t\t( {download_dir} )''')
+
+        desktop_btn = self.findChild(QPushButton, 'desktop') # Find the button
+        temp_btn = self.findChild(QPushButton, 'temp') # Find the button
+        download_btn = self.findChild(QPushButton, 'download_dir') # Find the button
+
+        desktop_btn.clicked.connect(lambda: self.setInstallDir(desktop)) # Remember to pass the definition/method, not the return value!
+        temp_btn.clicked.connect(lambda: self.setInstallDir(temp)) # Remember to pass the definition/method, not the return value!
+        download_btn.clicked.connect(lambda: self.setInstallDir(download_dir)) # Remember to pass the definition/method, not the return value!
+    
+    def mainWin(self):
+
+        self.info = self.findChild(QLabel, 'info')
+        if self.info.text() == "Info":
+            gateway,interface = list(gateways()['default'].values())[0]
+            mac = ifaddresses(interface)[AF_LINK][0]['addr']
+            ip, subnet, broadcast = ifaddresses(interface)[AF_INET][0].values()
+            sistema,nome,_,versione,_,processore = list(uname())
             
-            back = QPushButton("<-- Tornare indietro")
-            back.clicked.connect( self.main )
-                
-            layout1.addStretch(1)
-            layout1.addWidget(apri_cartella)
-            layout1.addWidget(esegui_programma)
-            layout1.addStretch(1)
-            
-            vlayout.addLayout(layout1)
-            vlayout.addStretch(1)
-            vlayout.addWidget(back)
-            
-            
-        return call
-    
-    ## End Download manager ##
-    
-    ## Home window  ##
-    
-    def main(self):
-        
-        # Get network info from library (netiface)
-        for nic in gateways()['default'].values():
-            if ip_address(nic[0]).version == 4:
-                gateway = nic[0]
-                interface = nic[1]
-        
-        mac = ifaddresses(interface)[AF_LINK][0]['addr']
-        ip, subnet, broadcast = ifaddresses(interface)[AF_INET][0].values()
-        
-        # Get system info form library (platform)
-        sistema,nome,_,versione,_,processore = list(uname())
-        
-        self.testo.setText(f'''###### Info ######\n''')
-        
-        if urllib.request.getproxies():
-            self.testo.setText(self.testo.text() + f"\n⚠️ Sono impostati dei proxy su Windows\n\n")
-        
-        self.testo.setText(self.testo.text() + f'''Network info:
-    GUID interfaccia:\t\t{interface}
-    MAC interface:\t\t{mac}
-    Gateway:\t\t{gateway} 
-    IP:\t\t\t{ip} 
-    Broadcast:\t\t{broadcast}
-    Subnet:\t\t{subnet}
+            testo = '''###### Info ######\n'''
+            if urllib.request.getproxies() or self.show_proxy_allert:
+                testo = testo + f"\n⚠️ Sono impostati dei proxy su Windows\n\n"
+            testo = testo + f'''Network info:\n\tMAC interface:\t\t{mac}\n\tGateway:\t\t\t{gateway}\n\tLocal IP:\t\t\t{ip}\n\tBroadcast:\t\t{broadcast}\n\tSubnet:\t\t\t{subnet}\n\nSystem info:\n\tOperating System:\t\t{sistema}\n\tVersion:\t\t\t{versione}\n\tProcessor:\t\t{processore}\n\tLogical Processor:\t\t{cpu_count()}\n\tSystem Name:\t\t{nome}'''
 
-System info:
-    Sistema:\t\t{sistema}
-    Versione:\t\t{versione}
-    Processore:\t\t{processore}
-    Processori logici:\t\t{os.cpu_count()}
-    Nome di sistema:\t\t{nome}
+            #print(gateway, interface, mac, ip, subnet, broadcast, sistema, nome, versione, processore, sep="\n")
+            self.info.setText(testo)
 
-Cosa devo fare?
-''')
-    
-        # Local button 
-        win_update = QPushButton("Tool Windows Update")
-        # TO windows_update window on click event
-        win_update.clicked.connect( self.windows_update )
-        
-        # Local button
-        download_antivirus = QPushButton("Scaricare Antivirus")
-        # TO download_antivirus on click event
-        download_antivirus.clicked.connect( self.download_antivirus )
-        
-        # Local button
-        cmd_commandi = QPushButton("Comandi CMD")
-        # TO cmd_comandi on click event
-        cmd_commandi.clicked.connect( self.cmd_command )
-        
-        # Local button
-        vari_tool = QPushButton("Tool vari")
-        # TO cmd_comandi on click event
-        vari_tool.clicked.connect( self.vari_tool )
-        
-        # 
-        # Same layout property
-        # 
-        
-        layout = QHBoxLayout()
-        layout.addStretch(1)
-        layout.addWidget(self.testo)
-        layout.addStretch(1)
+        toolWindowsUpdate = self.findChild(QPushButton, 'toolWindowsUpdate')
+        antivirusBnt = self.findChild(QPushButton, 'antivirusBnt')
+        cmdCommands = self.findChild(QPushButton, 'cmdCommands')
+        misc = self.findChild(QPushButton, 'misc')
         
         
-        layout1 = QHBoxLayout()
-        layout1.addStretch(1)
-        layout1.addWidget(win_update)
-        layout1.addWidget(download_antivirus)
-        layout1.addStretch(1)
-        
-        layout2 = QHBoxLayout()
-        layout2.addStretch(1)
-        layout2.addWidget(cmd_commandi)
-        layout2.addWidget(vari_tool)
-        layout2.addStretch(1)
-        
-        vlayout = QVBoxLayout()
-        vlayout.addLayout(layout)
-        vlayout.addStretch(1)
-        vlayout.addLayout(layout1)
-        vlayout.addLayout(layout2)
-        vlayout.addStretch(1)
-        
-        
-        wid = QWidget(self)
-        self.setCentralWidget(wid)
-        wid.setLayout(vlayout)
-    
-    
-        pass
-    
-    
-    def windows_update(self):
-        
-        self.testo.setText(f'''Cosa vuoi aprire?
+        toolWindowsUpdate.clicked.connect(lambda: self.changeScreen("styles/toolWinUp.ui",self.toolWinUp))
+        antivirusBnt.clicked.connect(lambda: self.changeScreen("styles/antivirus.ui", self.antivirus))
+        cmdCommands.clicked.connect(lambda: self.changeScreen("styles/cmdScript.ui", self.cmdScript))
+        misc.clicked.connect(lambda: self.changeScreen("styles/misc.ui", self.miscScreen))
 
-''')
-        
-        win_update = QPushButton("Aprire impostazioni di Windows Update")
-        win_update.clicked.connect( self.open_directory('ms-settings:windowsupdate-options') )
-        
-        tool_win_update = QPushButton("Scaricare tool di pulizia di Window Update")
-        tool_win_update.clicked.connect( self.download('win_update_tool','https://gallery.technet.microsoft.com/scriptcenter/Reset-Windows-Update-Agent-d824badc/file/201129/1/ResetWUEng.zip','ResetWUEng.zip','8 KB','Reset Windows Update Tool','ResetWUEng.cmd') )
-        
-        update_assistant = QPushButton("Scaricare Windows Update Assistant")
-        update_assistant.clicked.connect( self.download('win_update_assistant','https://download.microsoft.com/download/9/4/E/94E04254-741B-4316-B1DF-8CAEDF2DF16C/Windows10Upgrade9252.exe','Windows10Upgrade9252.exe','5.8 MB') )
-        
-        back = QPushButton("<-- Tornare indietro")
-        back.clicked.connect( self.main )
-        
-        # 
-        # Same layout property
-        # 
-        
-        layout = QHBoxLayout()
-        layout.addStretch(1)
-        layout.addWidget(self.testo)
-        layout.addStretch(1)
-        
-        layout1 = QHBoxLayout()
-        layout1.addStretch(1)
-        layout1.addWidget(win_update)
-        layout1.addWidget(tool_win_update)
-        layout1.addStretch(1)
-        
-        layout2 = QHBoxLayout()
-        layout2.addStretch(1)
-        layout2.addWidget(update_assistant)
-        layout2.addStretch(1)
-        
-        layout3 = QHBoxLayout()
-        layout3.addWidget(back)
-        
-        
-        vlayout = QVBoxLayout()
-        vlayout.addLayout(layout)
-        vlayout.addStretch(1)
-        vlayout.addLayout(layout1)
-        vlayout.addStretch(1)
-        vlayout.addLayout(layout2)
-        vlayout.addStretch(1)
-        vlayout.addLayout(layout3)
-        
-        
-        wid = QWidget(self)
-        self.setCentralWidget(wid)
-        wid.setLayout(vlayout)
-    
-    
-        pass
-    
-    
-    def download_antivirus(self):
-        self.testo.setText('''Scegliere quale antivirus scaricare
-Kaspersky (no-install)
-Kaspersky Free (install)
-''')
-        
-        # Local button
-        download_kaspersky_no_install = QPushButton("Kaspersky (no-install)")
-        # TO download on click event
-        download_kaspersky_no_install.clicked.connect( self.download('Kaspersky_no_install','http://devbuilds.kaspersky-labs.com/devbuilds/KVRT/latest/full/KVRT.exe','KVRT.exe','150 MB'))
-        
-        # Local button
-        download_kaspersky_install = QPushButton("Kaspersky Free (install)")
-        # TO download on click event
-        download_kaspersky_install.clicked.connect( self.download('Kaspersky_install','https://products.s.kaspersky-labs.com/homeuser/kfa2019/19.0.0.1088ab/italian-0.3880.0/5c42f68b/startup_15002.exe','startup_15002.exe','2.45 MB\n(Il file effettua download aggiuntivi)') )
-        
-        # Local button
-        back = QPushButton("<-- Tornare indietro")
-        # TO main on click event
-        back.clicked.connect( self.main )
-        
-        # 
-        # Same layout property
-        # 
-        
-        layout = QHBoxLayout()
-        layout.addStretch(1)
-        layout.addWidget(self.testo)
-        layout.addStretch(1)
-        
-        
-        layout1 = QHBoxLayout()
-        layout1.addStretch(1)
-        layout1.addWidget(download_kaspersky_no_install)
-        layout1.addWidget(download_kaspersky_install)
-        layout1.addStretch(1)
-        
-        
-        vlayout = QVBoxLayout()
-        vlayout.addLayout(layout)
-        vlayout.addStretch(1)
-        vlayout.addLayout(layout1)
-        vlayout.addStretch(1)
-        vlayout.addWidget(back)
-        
-        
-        wid = QWidget(self)
-        self.setCentralWidget(wid)
-        wid.setLayout(vlayout)
-        
-        
-        pass
+    def toolWinUp(self):
 
-    def cmd_command(self):
-        self.testo.setText('''Scegliere quale comando eseguire
-''')
-        
-        # Local button
-        cmd_dism = QPushButton("Integrità Windows DISM")
-        # TO run_program on click event
-        cmd_dism.clicked.connect( self.run_program(self.cmd,r"/k DISM.exe /Online /Cleanup-image /Restorehealth") )
-        
-        # Local button
-        cmd_sfc = QPushButton("File check SFC")
-        # TO run_program on click event
-        cmd_sfc.clicked.connect( self.run_program(self.cmd,r"/k sfc /scannow") )
-        
-        # Local button
-        cmd_purge_dns = QPushButton("Svuota cache DNS")
-        # TO run_program on click event
-        cmd_purge_dns.clicked.connect( self.run_program(self.cmd,r"/k ipconfig /flushdns") )
-        
-        # Local button
-        cmd_purge_arp = QPushButton("Svuota tabella ARP")
-        # TO run_program on click event
-        cmd_purge_arp.clicked.connect( self.run_program(self.cmd,r"/k arp -d && echo Done") )
-        
-        # Local button
-        back = QPushButton("<-- Tornare indietro")
-        # TO main on click event
-        back.clicked.connect( self.main )
-        
-        # 
-        # Same layout property
-        # 
-        
-        layout = QHBoxLayout()
-        layout.addStretch(1)
-        layout.addWidget(self.testo)
-        layout.addStretch(1)
-        
-        
-        layout1 = QHBoxLayout()
-        layout1.addStretch(1)
-        layout1.addWidget(cmd_dism)
-        layout1.addWidget(cmd_sfc)
-        layout1.addStretch(1)
-        
-        layout2 = QHBoxLayout()
-        layout2.addStretch(1)
-        layout2.addWidget(cmd_purge_dns)
-        layout2.addWidget(cmd_purge_arp)
-        layout2.addStretch(1)
-        
-        vlayout = QVBoxLayout()
-        vlayout.addLayout(layout)
-        vlayout.addStretch(1)
-        vlayout.addLayout(layout1)
-        vlayout.addLayout(layout2)
-        vlayout.addStretch(1)
-        vlayout.addWidget(back)
-        
-        
-        wid = QWidget(self)
-        self.setCentralWidget(wid)
-        wid.setLayout(vlayout)
-        
-        
-        pass
+        back = self.findChild(QPushButton, 'back')
+        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui",self.mainWin))
 
-    def vari_tool(self):
-        self.testo.setText('''Scegliere quale comando eseguire
-''')
-        
-        # Local button
-        host_dir = QPushButton("Cartella file hosts")
-        # TO run_program on click event
-        host = os.path.join(os.environ["systemdrive"], "\\Windows", "System32", "drivers", "etc")
-        
-        print(host)
-        
-        host_dir.clicked.connect( self.open_directory(host) )
-        
-        
-        # Local button
-        back = QPushButton("<-- Tornare indietro")
-        # TO main on click event
-        back.clicked.connect( self.main )
-        
-        # 
-        # Same layout property
-        # 
-        
-        layout = QHBoxLayout()
-        layout.addStretch(1)
-        layout.addWidget(self.testo)
-        layout.addStretch(1)
-        
-        
-        layout1 = QHBoxLayout()
-        layout1.addStretch(1)
-        layout1.addWidget(host_dir)
-        layout1.addStretch(1)
-        
-        
-        vlayout = QVBoxLayout()
-        vlayout.addLayout(layout)
-        vlayout.addStretch(1)
-        vlayout.addLayout(layout1)
-        vlayout.addStretch(1)
-        vlayout.addWidget(back)
-        
-        
-        wid = QWidget(self)
-        self.setCentralWidget(wid)
-        wid.setLayout(vlayout)
-        
-        
-        pass
+        openWinUp = self.findChild(QPushButton, 'openWinUp')
+        downWinUpCleaning = self.findChild(QPushButton, 'downWinUpCleaning')
+        downWinUpAssist = self.findChild(QPushButton, 'downWinUpAssist')
+
+        openWinUp.clicked.connect(lambda: self.openDir('ms-settings:windowsupdate-options'))
+
+        downWinUpCleaning_file = downloadFile("https://gallery.technet.microsoft.com/scriptcenter/Reset-Windows-Update-Agent-d824badc/file/224689/1/ResetWUEng.zip", self.install_dir + "//ResetWUEng.zip")
+        downWinUpCleaning.clicked.connect(lambda: self.download(downWinUpCleaning_file, None, None))
+
+        downWinUpAssist_file = downloadFile("https://go.microsoft.com/fwlink/?LinkID=799445", self.install_dir + "//Windows10Upgrade.exe")
+        downWinUpAssist.clicked.connect(lambda: self.download(downWinUpAssist_file, None, None))
+
+    def antivirus(self):
+        back = self.findChild(QPushButton, 'back')
+        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui",self.mainWin))
+
+        downKaspNoInstall = self.findChild(QPushButton, 'downKaspNoInstall')
+        downKaspInstall = self.findChild(QPushButton, 'downKaspInstall')
+
+        downKaspNoInstall_file = downloadFile("https://devbuilds.s.kaspersky-labs.com/devbuilds/KVRT/latest/full/KVRT.exe", self.install_dir + "//KVRT.exe")
+        downKaspNoInstall.clicked.connect(lambda: self.download(downKaspNoInstall_file, None, None))
+
+        downKaspInstall_file = downloadFile("https://trial.s.kaspersky-labs.com/registered/ptlklc45zcck7s2ghjeb/3235323732337c44454c7c32/ks3.020.0.14.1085abcdeit_19851.exe", self.install_dir + "//KVRT.exe")
+        downKaspInstall.clicked.connect(lambda: self.download(downKaspInstall_file, None, None))
+
+    def cmdScript(self):
+        back = self.findChild(QPushButton, 'back')
+        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui",self.mainWin))
+
+        runDismCommand = self.findChild(QPushButton, 'runDismCommand')
+        runSfcCommand = self.findChild(QPushButton, 'runSfcCommand')
+        emptyDnsCache = self.findChild(QPushButton, 'emptyDnsCache')
+        emptyArpTable = self.findChild(QPushButton, 'emptyArpTable')
+
+        runDismCommand.clicked.connect(lambda: self.runProgram(self.cmd,r"/k DISM.exe /Online /Cleanup-image /Restorehealth"))
+        runSfcCommand.clicked.connect(lambda: self.runProgram(self.cmd,r"/k sfc /scannow"))
+        emptyDnsCache.clicked.connect(lambda: self.runProgram(self.cmd,r"/k ipconfig /flushdns"))
+        emptyArpTable.clicked.connect(lambda: self.runProgram(self.cmd,r"/k arp -d && echo Done"))
+
+    def miscScreen(self):
+        back = self.findChild(QPushButton, 'back')
+        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui",self.mainWin))
+
+        host = path.join(environ["systemdrive"], "\\Windows", "System32", "drivers", "etc")
+
+        openHostsFile = self.findChild(QPushButton, 'openHostsFile')
+
+        openHostsFile.clicked.connect(lambda: self.openDir(host))
 
 
-## Start GUI
-def start():
-    
-    # QT auto pixel scale
-    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
-    
-    # Create instance of GUI
-    app = QApplication([])
-    
-    # QT auto pixel scale
-    app.setAttribute(Qt.AA_EnableHighDpiScaling)
-    
-    # QT GUI icon  -  USELESS
-    app.setWindowIcon(QIcon('icon.ico'))
-    
-    ## RUN
-    ex = Program()
-    app.exec_()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    sys.exit(app.exec_())
 
-
-
-# Function for checking privileges
-def is_admin():
-    
-    try:
-        is_admin = os.getuid() == 0
-    except AttributeError:
-        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-    
-    # Return True if is in privilege mode
-    # Return False if isn't in privilege mode
-    return is_admin
-
-
-## Start program ##
-
-# APP ID  -  useless?
-myappid = 'alessandrobasiit.windows01tool.program.18'
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-
-# Check if the program is in privilege mode, if is not
-if not is_admin():
-    
-    # Call privileges
-    ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, executable, None, 1)
-    
-# If the program has privilage
-if is_admin():
-    
-    
-    ## Start GUI
-    start()
-
-## If not error message
-else:
-    ctypes.windll.user32.MessageBoxW(0, "Avvia il programma come amministratore", "Errore", 0)
-
-
-## END
