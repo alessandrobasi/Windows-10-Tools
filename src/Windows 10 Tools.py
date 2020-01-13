@@ -11,7 +11,7 @@ from subprocess import Popen
 
 #Qt5
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QLineEdit, QLabel
+from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton
 from PyQt5.QtCore import QThread, Qt
 from PyQt5.Qt import QCoreApplication
 
@@ -41,10 +41,10 @@ class MainWindow(QMainWindow):
         self.statUp_password = 0
         self.show_proxy_allert = 0
         self.install_dir = ""
-        self.cmd = path.join(environ["SYSTEMDRIVE"],"\\windows","system32","cmd.exe")
-        
+        self.cmd = path.join(environ["SYSTEMDRIVE"], "\\windows", "system32", "cmd.exe")
+
         self.startUp()
-    
+
     # Util funct
     def changeScreen(self, fileUi, nextFunct=""):
         self.__nextFunct = nextFunct
@@ -60,18 +60,16 @@ class MainWindow(QMainWindow):
             self.changeScreen("styles/pickDir.ui", self.pickDir) # load ui
             #statUi() #run ui
 
-    def setInstallDir(self,nome_dir):
+    def setInstallDir(self, nome_dir):
         # Set download dir
-        
         # Global install dir
         self.install_dir = nome_dir
-        
 
         ## Verifica cartella
         if not path.exists(self.install_dir):
             ## Crea cartella
             makedirs(self.install_dir)
-        
+
         ## Verifica file
         """
         if not os.path.exists(dir_file+"\\"+file_scaricato):
@@ -117,7 +115,7 @@ class MainWindow(QMainWindow):
         except:
             Popen(fr'explorer')
 
-    def runProgram(self,program,parm=None):
+    def runProgram(self, program, parm=None):
         # Global run program
         try:
             if parm != None:
@@ -144,122 +142,92 @@ class MainWindow(QMainWindow):
     # Screens
     def startUp(self):
         if self.statUp_password:
-            statUi = self.changeScreen("styles/password.ui") # load ui
+            self.changeScreen("styles/password.ui") # load ui
             #statUi() #run ui
         else:
             statUi = self.changeScreen("styles/statUp.ui") # load ui
             #statUi() #run ui
 
-        button = self.findChild(QPushButton, 'conferma') # Find the button
-
+        
         if self.statUp_password:
-            self.password = self.findChild(QLineEdit, 'password')
-            button.clicked.connect(lambda: self.passwordScreen() ) # Remember to pass the definition/method, not the return value!
+            self.conferma.clicked.connect(lambda: self.passwordScreen() ) # Remember to pass the definition/method, not the return value!
         else:
-            button.clicked.connect(lambda: self.changeScreen("styles/pickDir.ui", self.pickDir) )
+            self.conferma.clicked.connect(lambda: self.changeScreen("styles/pickDir.ui", self.pickDir) )
 
     def pickDir(self):
 
-        desktop  = path.join(environ["systemdrive"], environ["HOMEPATH"], "Desktop", "Windows 10 tool")    ## <K>:\Users\<user>\Desktop
-        temp = path.join(environ["systemdrive"], environ["temp"], "Windows 10 tool")                   ## <K>:\Users\<user>\AppData\Local\Temp
-        download_dir = path.join(environ["systemdrive"], environ["HOMEPATH"],"Downloads","Windows 10 tool") ## <K>:\Users\<user>\Download
+        desktop_path = path.join(environ["systemdrive"], environ["HOMEPATH"], "Desktop", "Windows 10 tool")    ## <K>:\Users\<user>\Desktop
+        temp_path = path.join(environ["systemdrive"], environ["temp"], "Windows 10 tool")                   ## <K>:\Users\<user>\AppData\Local\Temp
+        download_path = path.join(environ["systemdrive"], environ["HOMEPATH"], "Downloads", "Windows 10 tool") ## <K>:\Users\<user>\Download
 
-        test_cartelle = self.findChild(QLabel, "cartelle")
-        test_cartelle.setText(f'''Desktop\t\t( {desktop} )\nTemp\t\t( {temp} )\nDownload\t\t( {download_dir} )''')
+        self.cartelle.setText(f'''Desktop\t\t( {desktop_path} )\nTemp\t\t( {temp_path} )\nDownload\t\t( {download_path} )''')
 
-        desktop_btn = self.findChild(QPushButton, 'desktop') # Find the button
-        temp_btn = self.findChild(QPushButton, 'temp') # Find the button
-        download_btn = self.findChild(QPushButton, 'download_dir') # Find the button
-
-        desktop_btn.clicked.connect(lambda: self.setInstallDir(desktop)) # Remember to pass the definition/method, not the return value!
-        temp_btn.clicked.connect(lambda: self.setInstallDir(temp)) # Remember to pass the definition/method, not the return value!
-        download_btn.clicked.connect(lambda: self.setInstallDir(download_dir)) # Remember to pass the definition/method, not the return value!
+        self.desktop.clicked.connect(lambda: self.setInstallDir(desktop_path)) # Remember to pass the definition/method, not the return value!
+        self.temp.clicked.connect(lambda: self.setInstallDir(temp_path)) # Remember to pass the definition/method, not the return value!
+        self.download_dir.clicked.connect(lambda: self.setInstallDir(download_path)) # Remember to pass the definition/method, not the return value!
     
     def mainWin(self):
 
-        self.info = self.findChild(QLabel, 'info')
         if self.info.text() == "Info":
-            gateway,interface = list(gateways()['default'].values())[0]
+            gateway, interface = list(gateways()['default'].values())[0]
             mac = ifaddresses(interface)[AF_LINK][0]['addr']
             ip, subnet, broadcast = ifaddresses(interface)[AF_INET][0].values()
-            sistema,nome,_,versione,_,processore = list(uname())
-            
+            sistema, nome, _, versione, _, processore = list(uname())
+
             testo = '''###### Info ######\n'''
             if urllib.request.getproxies() or self.show_proxy_allert:
                 testo = testo + f"\n⚠️ Sono impostati dei proxy su Windows\n\n"
             testo = testo + f'''Network info:\n\tMAC interface:\t\t{mac}\n\tGateway:\t\t\t{gateway}\n\tLocal IP:\t\t\t{ip}\n\tBroadcast:\t\t{broadcast}\n\tSubnet:\t\t\t{subnet}\n\nSystem info:\n\tOperating System:\t\t{sistema}\n\tVersion:\t\t\t{versione}\n\tProcessor:\t\t{processore}\n\tLogical Processor:\t\t{cpu_count()}\n\tSystem Name:\t\t{nome}'''
 
-            #print(gateway, interface, mac, ip, subnet, broadcast, sistema, nome, versione, processore, sep="\n")
             self.info.setText(testo)
 
-        toolWindowsUpdate = self.findChild(QPushButton, 'toolWindowsUpdate')
-        antivirusBnt = self.findChild(QPushButton, 'antivirusBnt')
-        cmdCommands = self.findChild(QPushButton, 'cmdCommands')
-        misc = self.findChild(QPushButton, 'misc')
-        
-        
-        toolWindowsUpdate.clicked.connect(lambda: self.changeScreen("styles/toolWinUp.ui",self.toolWinUp))
-        antivirusBnt.clicked.connect(lambda: self.changeScreen("styles/antivirus.ui", self.antivirus))
-        cmdCommands.clicked.connect(lambda: self.changeScreen("styles/cmdScript.ui", self.cmdScript))
-        misc.clicked.connect(lambda: self.changeScreen("styles/misc.ui", self.miscScreen))
+        self.toolWindowsUpdate.clicked.connect(lambda: self.changeScreen("styles/toolWinUp.ui", self.toolWinUp))
+        self.antivirusBnt.clicked.connect(lambda: self.changeScreen("styles/antivirus.ui", self.antivirus))
+        self.cmdCommands.clicked.connect(lambda: self.changeScreen("styles/cmdScript.ui", self.cmdScript))
+        self.misc.clicked.connect(lambda: self.changeScreen("styles/misc.ui", self.miscScreen))
 
     def toolWinUp(self):
 
         back = self.findChild(QPushButton, 'back')
-        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui",self.mainWin))
+        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui", self.mainWin))
 
-        openWinUp = self.findChild(QPushButton, 'openWinUp')
-        downWinUpCleaning = self.findChild(QPushButton, 'downWinUpCleaning')
-        downWinUpAssist = self.findChild(QPushButton, 'downWinUpAssist')
-
-        openWinUp.clicked.connect(lambda: self.openDir('ms-settings:windowsupdate-options'))
+        self.openWinUp.clicked.connect(lambda: self.openDir('ms-settings:windowsupdate-options'))
 
         downWinUpCleaning_file = downloadFile("https://gallery.technet.microsoft.com/scriptcenter/Reset-Windows-Update-Agent-d824badc/file/224689/1/ResetWUEng.zip", self.install_dir + "//ResetWUEng.zip")
-        downWinUpCleaning.clicked.connect(lambda: self.download(downWinUpCleaning_file, None, None))
+        self.downWinUpCleaning.clicked.connect(lambda: self.download(downWinUpCleaning_file, None, None))
 
         downWinUpAssist_file = downloadFile("https://go.microsoft.com/fwlink/?LinkID=799445", self.install_dir + "//Windows10Upgrade.exe")
-        downWinUpAssist.clicked.connect(lambda: self.download(downWinUpAssist_file, None, None))
+        self.downWinUpAssist.clicked.connect(lambda: self.download(downWinUpAssist_file, None, None))
 
     def antivirus(self):
         back = self.findChild(QPushButton, 'back')
-        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui",self.mainWin))
-
-        downKaspNoInstall = self.findChild(QPushButton, 'downKaspNoInstall')
-        downKaspInstall = self.findChild(QPushButton, 'downKaspInstall')
+        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui", self.mainWin))
 
         downKaspNoInstall_file = downloadFile("https://devbuilds.s.kaspersky-labs.com/devbuilds/KVRT/latest/full/KVRT.exe", self.install_dir + "//KVRT.exe")
-        downKaspNoInstall.clicked.connect(lambda: self.download(downKaspNoInstall_file, None, None))
+        self.downKaspNoInstall.clicked.connect(lambda: self.download(downKaspNoInstall_file, None, None))
 
         downKaspInstall_file = downloadFile("https://trial.s.kaspersky-labs.com/registered/ptlklc45zcck7s2ghjeb/3235323732337c44454c7c32/ks3.020.0.14.1085abcdeit_19851.exe", self.install_dir + "//KVRT.exe")
-        downKaspInstall.clicked.connect(lambda: self.download(downKaspInstall_file, None, None))
+        self.downKaspInstall.clicked.connect(lambda: self.download(downKaspInstall_file, None, None))
 
     def cmdScript(self):
         back = self.findChild(QPushButton, 'back')
-        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui",self.mainWin))
+        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui", self.mainWin))
 
-        runDismCommand = self.findChild(QPushButton, 'runDismCommand')
-        runSfcCommand = self.findChild(QPushButton, 'runSfcCommand')
-        emptyDnsCache = self.findChild(QPushButton, 'emptyDnsCache')
-        emptyArpTable = self.findChild(QPushButton, 'emptyArpTable')
-
-        runDismCommand.clicked.connect(lambda: self.runProgram(self.cmd,r"/k DISM.exe /Online /Cleanup-image /Restorehealth"))
-        runSfcCommand.clicked.connect(lambda: self.runProgram(self.cmd,r"/k sfc /scannow"))
-        emptyDnsCache.clicked.connect(lambda: self.runProgram(self.cmd,r"/k ipconfig /flushdns"))
-        emptyArpTable.clicked.connect(lambda: self.runProgram(self.cmd,r"/k arp -d && echo Done"))
+        self.runDismCommand.clicked.connect(lambda: self.runProgram(self.cmd, r"/k DISM.exe /Online /Cleanup-image /Restorehealth"))
+        self.runSfcCommand.clicked.connect(lambda: self.runProgram(self.cmd, r"/k sfc /scannow"))
+        self.emptyDnsCache.clicked.connect(lambda: self.runProgram(self.cmd, r"/k ipconfig /flushdns"))
+        self.emptyArpTable.clicked.connect(lambda: self.runProgram(self.cmd, r"/k arp -d && echo Done"))
 
     def miscScreen(self):
         back = self.findChild(QPushButton, 'back')
-        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui",self.mainWin))
+        back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui", self.mainWin))
 
         host = path.join(environ["systemdrive"], "\\Windows", "System32", "drivers", "etc")
 
-        openHostsFile = self.findChild(QPushButton, 'openHostsFile')
-
-        openHostsFile.clicked.connect(lambda: self.openDir(host))
+        self.openHostsFile.clicked.connect(lambda: self.openDir(host))
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     sys.exit(app.exec_())
-
