@@ -75,7 +75,7 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
         <widget class="QPushButton" name="runDismCommand">
          <property name="text">
@@ -93,7 +93,7 @@
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QPushButton" name="emptyDnsCache">
          <property name="text">
@@ -105,6 +105,24 @@
         <widget class="QPushButton" name="emptyArpTable">
          <property name="text">
           <string>Empty ARP table</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="runChkdskCommand">
+         <property name="text">
+          <string>Check Disk (CHKDSK)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="runNetstatPortCommand">
+         <property name="text">
+          <string>Netstat: View ports</string>
          </property>
         </widget>
        </item>

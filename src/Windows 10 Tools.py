@@ -217,6 +217,8 @@ class MainWindow(QMainWindow):
         self.runSfcCommand.clicked.connect(lambda: self.runProgram(self.cmd, r"/k sfc /scannow"))
         self.emptyDnsCache.clicked.connect(lambda: self.runProgram(self.cmd, r"/k ipconfig /flushdns"))
         self.emptyArpTable.clicked.connect(lambda: self.runProgram(self.cmd, r"/k arp -d && echo Done"))
+        self.runChkdskCommand.clicked.connect(lambda: self.runProgram(self.cmd, r"/k chkdsk C: /f /r /x"))
+        self.runNetstatPortCommand.clicked.connect(lambda: self.runProgram(self.cmd, r"/k netstat -a -n -o"))
 
     def miscScreen(self):
         back = self.findChild(QPushButton, 'back')
