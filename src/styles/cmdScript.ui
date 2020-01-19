@@ -145,6 +145,15 @@
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>runDismCommand</tabstop>
+  <tabstop>runSfcCommand</tabstop>
+  <tabstop>emptyDnsCache</tabstop>
+  <tabstop>emptyArpTable</tabstop>
+  <tabstop>runChkdskCommand</tabstop>
+  <tabstop>runNetstatPortCommand</tabstop>
+  <tabstop>back</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

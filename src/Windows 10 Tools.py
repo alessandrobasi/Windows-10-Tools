@@ -225,8 +225,10 @@ class MainWindow(QMainWindow):
         back.clicked.connect(lambda: self.changeScreen("styles/mainWin.ui", self.mainWin))
 
         host = path.join(environ["systemdrive"], "\\Windows", "System32", "drivers", "etc")
+        admin_tools = path.join(environ["systemdrive"], "\\ProgramData", "Microsoft", "Windows", "Start Menu", "Programs", "Administrative Tools") 
 
         self.openHostsFile.clicked.connect(lambda: self.openDir(host))
+        self.openAdminTools.clicked.connect(lambda: self.openDir(admin_tools))
 
 
 if __name__ == "__main__":

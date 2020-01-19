@@ -83,6 +83,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="openAdminTools">
+         <property name="text">
+          <string>Administrative Tools</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>
@@ -102,6 +109,11 @@
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>openHostsFile</tabstop>
+  <tabstop>openAdminTools</tabstop>
+  <tabstop>back</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
